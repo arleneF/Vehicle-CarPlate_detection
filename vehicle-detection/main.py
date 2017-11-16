@@ -28,7 +28,7 @@ def pipeline_yolo(img):
 
 if __name__ == "__main__":
 
-        
+
         filename = 'examples/car1.jpg'
         image = mpimg.imread(filename)
         image = cv2.resize(image,(1280,720))
@@ -38,9 +38,5 @@ if __name__ == "__main__":
         plt.figure()
         plt.imshow(yolo_result)
         plt.title('yolo pipeline', fontsize=30)
-        plt.savefig('examples/123.jpg')
+        # plt.savefig('examples/123.jpg')
         plt.show()
-        
-
-
-
