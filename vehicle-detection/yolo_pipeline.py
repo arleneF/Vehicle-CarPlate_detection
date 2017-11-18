@@ -9,94 +9,126 @@ from visualizations import *
 
 # --------define the model---------#
 from keras.models import Sequential
-from keras.models import Activation
-from keras.layers import Conv2D, MaxPolling2D
+from keras.layers import Conv2D, MaxPooling2D
 from keras.layers import Activation, Dropout, Flatten, Dense
 
 class yolo_tf:
-    w_img = 1280
-    h_img = 720
+	w_img = 1280
+	h_img = 720
 
-    weights_file = 'weights/YOLO_small.ckpt'
-    alpha = 0.1
-    threshold = 0.3
-    iou_threshold = 0.5
+	weights_file = 'weights/YOLO_tiny.ckpt'
+	alpha = 0.1
+	threshold = 0.3
+	iou_threshold = 0.5
 
-    result_list = None
-    classes =  ["aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair",
+	result_list = None
+	classes =  ["aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair",
                 "cow", "diningtable", "dog", "horse", "motorbike", "person", "pottedplant",
                 "sheep", "sofa", "train","tvmonitor"]
 
-    def __init__(self):
-        self.build_networks()
+	def __init__(self):
+		#tf.reset_default_graph()
+		self.build_networks()
 
-    def build_networks(self):
-        print("Building YOLO_small graph...")
-        model=Sequential()
-        model.add(Conv2D(64,(7,7)),input_shape=(448,448,3)) #64 filters, each filter's size is (7*7)
-        model.add(Activation('relu'))
-        model.add(MaxPolling2D(poll_size=(2,2)))
-        model.add(Conv2D(192,(3,3)))
-        model.add(Activation('relu'))
-        model.add(MaxPolling2D(poll_size=(2,2)))
-        model.add(Conv2D(128,(1,1)))
-        model.add(Conv2D(256,(3,3)))
-        model.add(Conv2D(256,(1,1)))
-        model.add(Conv2D(512,(3,3)))
-        model.add(Activation('relu'))
-        model.add(MaxPolling2D(poll_size=(2,2)))
-        model.add(Conv2D(256,(1,1)))
-        model.add(Conv2D(512,(3,3)))
-        model.add(Conv2D(256,(1,1)))
-        model.add(Conv2D(512,(3,3)))
-        model.add(Conv2D(256,(1,1)))
-        model.add(Conv2D(512,(3,3)))
-        model.add(Conv2D(256,(1,1)))
-        model.add(Conv2D(512,(3,3)))
-        model.add(Conv2D(512,(1,1)))
-        model.add(Conv2D(1024,(3,3)))
-        model.add(Activation('relu'))
-        model.add(MaxPolling2D(poll_size=(2,2)))
-        model.add(Conv2D(512,(1,1)))
-        model.add(Conv2D(1024,(3,3)))
-        model.add(Conv2D(512,(1,1)))
-        model.add(Conv2D(1024,(3,3)))
-        model.add(Conv2D(1024,(3,3)))
-        model.add(Conv2D(1024,(3,3)))
-        model.add(Conv2D(1024,(3,3)))
-        model.add(Conv2D(1024,(3,3)))
-        model.add(Flatten())
-        model.add(Dense(512)) #fully connected layer
-        model.add(Activation('relu'))
-        model.add(Dense(4096)) #fully connected layer
-        model.add(Activation('relu'))
-        model.add(Dense(1470)) #fully connected layer
-        model.add(Activation('relu'))
-        model.add(Dropout(0.5))
-        model.add(Dense(1))
-        model.add(Activation('sigmoid'))
-        model.compile(loss='binary_crossentropy', optimizer='Adam', metrics=['accuracy'])
-        model.summary()
+	def build_networks(self):
+		print("Building YOLO_small graph...")
+		#build a classifier
+		self.x=tf.placeholder(tf.float32,shape=(448,448,3))
 
-        #     self.sess = tf.Session()
-        #     self.sess.run(tf.global_variables_initializer())
-        #     self.saver = tf.train.Saver()
-        #     self.saver.restore(self.sess, self.weights_file)
-        #     print("Loading complete!")
-        sess=tf.Session() # creating a Tensorflow session
-        K.set_session(sess) # registering it with keras, this means that keras will use the session we registered to initialize all variables that it creates internally
-        #initialize all variables
-        init_op=tf.global_variables_initializer()
-        sess.run(init_op)
+		model=Sequential()
+		model.add(Conv2D(64,(7,7),strides=2,input_shape=(448,448,3))) #64 filters, each filter's size is (7*7)
+		model.add(Activation('relu'))
+		model.add(MaxPooling2D(pool_size=(2,2),strides=2))
+		
+		model.add(Conv2D(192,(3,3)))
+		model.add(Activation('relu'))
+		model.add(MaxPooling2D(pool_size=(2,2),strides=2))
+		
+		model.add(Conv2D(128,(1,1)))
+		model.add(Activation('relu'))
+		
+		model.add(Conv2D(256,(3,3)))
+		model.add(Activation('relu'))
+		
+		model.add(Conv2D(256,(1,1)))
+		model.add(Activation('relu'))
+		
+		model.add(Conv2D(512,(3,3)))
+		model.add(Activation('relu'))
+		model.add(MaxPooling2D(pool_size=(2,2),strides=2))
+		
+		model.add(Conv2D(256,(1,1)))
+		model.add(Activation('relu'))
+		model.add(Conv2D(512,(3,3)))
+		model.add(Activation('relu'))
+		
+		model.add(Conv2D(256,(1,1)))
+		model.add(Activation('relu'))
+		model.add(Conv2D(512,(3,3)))
+		model.add(Activation('relu'))
+				
+		model.add(Conv2D(256,(1,1)))
+		model.add(Activation('relu'))
+		model.add(Conv2D(512,(3,3)))
+		model.add(Activation('relu'))
+				
+		model.add(Conv2D(256,(1,1)))
+		model.add(Activation('relu'))
+		model.add(Conv2D(512,(3,3)))
+		model.add(Activation('relu'))
+		
+		model.add(Conv2D(512,(1,1)))
+		model.add(Activation('relu'))
+		
+		model.add(Conv2D(1024,(3,3)))
+		model.add(Activation('relu'))
+		model.add(MaxPooling2D(pool_size=(2,2),strides=2))
+		
+		model.add(Conv2D(512,(1,1)))
+		model.add(Activation('relu'))
+		model.add(Conv2D(1024,(3,3)))
+		model.add(Activation('relu'))
+		
+		model.add(Conv2D(512,(1,1)))
+		model.add(Activation('relu'))
+		model.add(Conv2D(1024,(3,3)))
+		model.add(Activation('relu'))
+		
+		model.add(Conv2D(1024,(3,3)))
+		model.add(Activation('relu'))
+		
+		model.add(Conv2D(1024,(3,3),strides=2))
+		model.add(Activation('relu'))
+		
+		model.add(Conv2D(1024,(3,3)))
+		model.add(Activation('relu'))
+		
+		model.add(Conv2D(1024,(3,3)))
+		model.add(Activation('relu'))
+		
+		model.add(Flatten())
+		
+		model.add(Dense(4096)) #fully connected layer
+		#model.add(Activation('relu'))
+		
+		model.add(Dense(1470)) #fully connected layer
+		
+		#model.compile(loss='binary_crossentropy', optimizer='Adam', metrics=['accuracy'])
+		#model.summary()
 
-        saver = tf.train.Saver()
-        saver.restore(sess, weights_file)
+		sess=tf.Session() # creating a Tensorflow session
+		#K.set_session(sess) # registering it with keras, this means that keras will use the session we registered to initialize all variables that it creates internally
+		#initialize all variables
+		init_op=tf.global_variables_initializer()
+		sess.run(init_op)
 
-        #build a classifier
-        x=tf.placeholder(tf.float32,shape=(None,448,448,3))
-        #use keras layers to speed up the model definition process
-        preds=model(x) #put placeholder in to defined model
-        print("Loading complete!")
+		saver = tf.train.Saver()
+		saver.restore(sess, self.weights_file)
+
+
+		#use keras layers to speed up the model definition process
+		#preds=model(x) #put placeholder in to defined model
+		print("Loading complete!")
 
 def detect_from_cvmat(yolo,img):
     #length = len(img.shape)
@@ -111,7 +143,7 @@ def detect_from_cvmat(yolo,img):
     inputs = np.zeros((1,448,448,3),dtype='float32')
     inputs[0] = (img_resized_np/255.0)*2.0-1.0
     in_dict = {yolo.x: inputs}
-    net_output = yolo.sess.run(yolo.fc_32,feed_dict=in_dict)
+    net_output = yolo.sess.run(yolo.model,feed_dict=in_dict)
     result = interpret_output(yolo, net_output[0])
     yolo.result_list = result
 
