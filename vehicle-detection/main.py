@@ -1,12 +1,8 @@
-
 import matplotlib.image as mpimg
 from yolo_pipeline import *
 import glob
 
 from copy import copy
-
-
-
 
 if __name__ == "__main__":
     counter = 0

@@ -1,26 +1,26 @@
-# import numpy as np
+import numpy as np
 import tensorflow as tf
 from keras import backend as K
-# import cv2
+import cv2
 from timeit import default_timer as timer
 import time
 import matplotlib.pyplot as plt
 from visualizations import *
 
-# --------define the model---------#
+# --------Define the model--------- #
 from keras.models import Sequential
 from keras.layers import Conv2D, MaxPooling2D
 from keras.layers import Activation, Dropout, Flatten, Dense
+from keras.layers.advanced_activations import LeakyReLU
 
 class yolo_tf:
+	# ---------Initialization-------- #
 	w_img = 1280
 	h_img = 720
-
 	weights_file = 'weights/YOLO_tiny.ckpt'
 	alpha = 0.1
 	threshold = 0.3
 	iou_threshold = 0.5
-
 	result_list = None
 	classes =  ["aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair",
                 "cow", "diningtable", "dog", "horse", "motorbike", "person", "pottedplant",
@@ -33,86 +33,50 @@ class yolo_tf:
 	def build_networks(self):
 		print("Building YOLO_small graph...")
 		#build a classifier
-		self.x=tf.placeholder(tf.float32,shape=(448,448,3))
+		# self.x=tf.placeholder(tf.float32,shape=(448,448,3))
+		self.x=tf.placeholder(tf.float32,[None,448,448,3])
 
 		model=Sequential()
-		model.add(Conv2D(64,(7,7),strides=2,input_shape=(448,448,3))) #64 filters, each filter's size is (7*7)
-		model.add(Activation('relu'))
-		model.add(MaxPooling2D(pool_size=(2,2),strides=2))
-		
-		model.add(Conv2D(192,(3,3)))
-		model.add(Activation('relu'))
-		model.add(MaxPooling2D(pool_size=(2,2),strides=2))
-		
-		model.add(Conv2D(128,(1,1)))
-		model.add(Activation('relu'))
-		
-		model.add(Conv2D(256,(3,3)))
-		model.add(Activation('relu'))
-		
-		model.add(Conv2D(256,(1,1)))
-		model.add(Activation('relu'))
-		
-		model.add(Conv2D(512,(3,3)))
-		model.add(Activation('relu'))
-		model.add(MaxPooling2D(pool_size=(2,2),strides=2))
-		
-		model.add(Conv2D(256,(1,1)))
-		model.add(Activation('relu'))
-		model.add(Conv2D(512,(3,3)))
-		model.add(Activation('relu'))
-		
-		model.add(Conv2D(256,(1,1)))
-		model.add(Activation('relu'))
-		model.add(Conv2D(512,(3,3)))
-		model.add(Activation('relu'))
-				
-		model.add(Conv2D(256,(1,1)))
-		model.add(Activation('relu'))
-		model.add(Conv2D(512,(3,3)))
-		model.add(Activation('relu'))
-				
-		model.add(Conv2D(256,(1,1)))
-		model.add(Activation('relu'))
-		model.add(Conv2D(512,(3,3)))
-		model.add(Activation('relu'))
-		
-		model.add(Conv2D(512,(1,1)))
-		model.add(Activation('relu'))
-		
-		model.add(Conv2D(1024,(3,3)))
-		model.add(Activation('relu'))
-		model.add(MaxPooling2D(pool_size=(2,2),strides=2))
-		
-		model.add(Conv2D(512,(1,1)))
-		model.add(Activation('relu'))
-		model.add(Conv2D(1024,(3,3)))
-		model.add(Activation('relu'))
-		
-		model.add(Conv2D(512,(1,1)))
-		model.add(Activation('relu'))
-		model.add(Conv2D(1024,(3,3)))
-		model.add(Activation('relu'))
-		
-		model.add(Conv2D(1024,(3,3)))
-		model.add(Activation('relu'))
-		
-		model.add(Conv2D(1024,(3,3),strides=2))
-		model.add(Activation('relu'))
-		
-		model.add(Conv2D(1024,(3,3)))
-		model.add(Activation('relu'))
-		
-		model.add(Conv2D(1024,(3,3)))
-		model.add(Activation('relu'))
-		
-		model.add(Flatten())
-		
-		model.add(Dense(4096)) #fully connected layer
+		model.add(Conv2D(64,(7,7),strides=2,input_shape=self.x,activation='LeakyRelU')) #64 filters, each filter's size is (7*7)
+		# model.add(Conv2D(64,(7,7),strides=2,input_shape=(448,448,3),activation='LeakyRelU')) #64 filters, each filter's size is (7*7)
 		#model.add(Activation('relu'))
-		
+		model.add(MaxPooling2D(pool_size=(2,2),strides=2))
+
+		model.add(Conv2D(192,(3,3),activation='LeakyRelU'))
+		model.add(MaxPooling2D(pool_size=(2,2),strides=2))
+
+		model.add(Conv2D(128,(1,1),activation='LeakyRelU'))
+		model.add(Conv2D(256,(3,3),activation='LeakyRelU'))
+		model.add(Conv2D(256,(1,1),activation='LeakyRelU'))
+		model.add(Conv2D(512,(3,3),activation='LeakyRelU'))
+		model.add(MaxPooling2D(pool_size=(2,2),strides=2))
+
+		model.add(Conv2D(256,(1,1),activation='LeakyRelU'))
+		model.add(Conv2D(512,(3,3),activation='LeakyRelU'))
+		model.add(Conv2D(256,(1,1),activation='LeakyRelU'))
+		model.add(Conv2D(512,(3,3),activation='LeakyRelU'))
+		model.add(Conv2D(256,(1,1),activation='LeakyRelU'))
+		model.add(Conv2D(512,(3,3),activation='LeakyRelU'))
+		model.add(Conv2D(256,(1,1),activation='LeakyRelU'))
+		model.add(Conv2D(512,(3,3),activation='LeakyRelU'))
+		model.add(Conv2D(512,(1,1),activation='LeakyRelU'))
+		model.add(Conv2D(1024,(3,3),activation='LeakyRelU'))
+		model.add(MaxPooling2D(pool_size=(2,2),strides=2))
+
+		model.add(Conv2D(512,(1,1),activation='LeakyRelU'))
+		model.add(Conv2D(1024,(3,3),activation='LeakyRelU'))
+		model.add(Conv2D(512,(1,1),activation='LeakyRelU'))
+		model.add(Conv2D(1024,(3,3),activation='LeakyRelU'))
+		model.add(Conv2D(1024,(3,3),activation='LeakyRelU'))
+		model.add(Conv2D(1024,(3,3),strides=2))
+
+		model.add(Conv2D(1024,(3,3),activation='LeakyRelU'))
+		model.add(Conv2D(1024,(3,3),activation='LeakyRelU'))
+
+		model.add(Flatten())
+		model.add(Dense(4096)) #fully connected layer
 		model.add(Dense(1470)) #fully connected layer
-		
+
 		#model.compile(loss='binary_crossentropy', optimizer='Adam', metrics=['accuracy'])
 		#model.summary()
 
@@ -131,15 +95,11 @@ class yolo_tf:
 		print("Loading complete!")
 
 def detect_from_cvmat(yolo,img):
-    #length = len(img.shape)
-    #if length == 2:
-        #yolo.h_img,yolo.w_img = img.shape
-
-    #else:
+	#image.shape return (height, width, channel), but here we delibrately ignore channel variable
     yolo.h_img,yolo.w_img,_ = img.shape
 
     img_resized = cv2.resize(img, (448, 448))
-    img_resized_np = np.asarray( img_resized )
+    img_resized_np = np.asarray( img_resized ) #convert input to an array
     inputs = np.zeros((1,448,448,3),dtype='float32')
     inputs[0] = (img_resized_np/255.0)*2.0-1.0
     in_dict = {yolo.x: inputs}
@@ -224,14 +184,7 @@ def draw_results(img, yolo, fps,counter):
             window_list.append(((x-w,y-h),(x+w,y+h)))
 
     # draw vehicle thumbnails
-
     draw_thumbnails(img_cp, img, window_list,counter)
-
-
-    # draw speed
-    # draw_speed(img_cp, fps, yolo.w_img)
-
-
     return img_cp
 
 def iou(box1,box2):
