@@ -17,7 +17,7 @@ class yolo_tf:
 	# ---------Initialization-------- #
 	w_img = 1280
 	h_img = 720
-	weights_file = 'weights/YOLO_tiny.ckpt'
+	weights_file = 'weights/YOLO_small.ckpt'
 	alpha = 0.1
 	threshold = 0.3
 	iou_threshold = 0.5
@@ -34,48 +34,75 @@ class yolo_tf:
 		print("Building YOLO_small graph...")
 		#build a classifier
 		# self.x=tf.placeholder(tf.float32,shape=(448,448,3))
-		self.x=tf.placeholder(tf.float32,[None,448,448,3])
+		self.x=tf.placeholder(tf.float32,shape=(448,448,3))
 
 		model=Sequential()
-		model.add(Conv2D(64,(7,7),strides=2,input_shape=self.x,activation='LeakyRelU')) #64 filters, each filter's size is (7*7)
-		# model.add(Conv2D(64,(7,7),strides=2,input_shape=(448,448,3),activation='LeakyRelU')) #64 filters, each filter's size is (7*7)
-		#model.add(Activation('relu'))
+		#!!!!!!!one possible to change to make it work:
+		#input_shape should link to x
+		#and maybe try without activation = 'linear'
+		model.add(Conv2D(64,(7,7),strides=2,input_shape=(448,448,3),activation='linear',padding='same')) #64 filters, each filter's size is (7*7)
+		model.add(LeakyReLU(alpha=.1))
 		model.add(MaxPooling2D(pool_size=(2,2),strides=2))
 
-		model.add(Conv2D(192,(3,3),activation='LeakyRelU'))
+		model.add(Conv2D(192,(3,3),activation='linear',padding='same'))
+		model.add(LeakyReLU(alpha=.1))
 		model.add(MaxPooling2D(pool_size=(2,2),strides=2))
 
-		model.add(Conv2D(128,(1,1),activation='LeakyRelU'))
-		model.add(Conv2D(256,(3,3),activation='LeakyRelU'))
-		model.add(Conv2D(256,(1,1),activation='LeakyRelU'))
-		model.add(Conv2D(512,(3,3),activation='LeakyRelU'))
+		model.add(Conv2D(128,(1,1),activation='linear',padding='same'))
+		model.add(LeakyReLU(alpha=.1))
+		model.add(Conv2D(256,(3,3),activation='linear',padding='same'))
+		model.add(LeakyReLU(alpha=.1))
+		model.add(Conv2D(256,(1,1),activation='linear',padding='same'))
+		model.add(LeakyReLU(alpha=.1))
+		model.add(Conv2D(512,(3,3),activation='linear',padding='same'))
+		model.add(LeakyReLU(alpha=.1))
 		model.add(MaxPooling2D(pool_size=(2,2),strides=2))
 
-		model.add(Conv2D(256,(1,1),activation='LeakyRelU'))
-		model.add(Conv2D(512,(3,3),activation='LeakyRelU'))
-		model.add(Conv2D(256,(1,1),activation='LeakyRelU'))
-		model.add(Conv2D(512,(3,3),activation='LeakyRelU'))
-		model.add(Conv2D(256,(1,1),activation='LeakyRelU'))
-		model.add(Conv2D(512,(3,3),activation='LeakyRelU'))
-		model.add(Conv2D(256,(1,1),activation='LeakyRelU'))
-		model.add(Conv2D(512,(3,3),activation='LeakyRelU'))
-		model.add(Conv2D(512,(1,1),activation='LeakyRelU'))
-		model.add(Conv2D(1024,(3,3),activation='LeakyRelU'))
+		model.add(Conv2D(256,(1,1),activation='linear',padding='same'))
+		model.add(LeakyReLU(alpha=.1))
+		model.add(Conv2D(512,(3,3),activation='linear',padding='same'))
+		model.add(LeakyReLU(alpha=.1))
+		model.add(Conv2D(256,(1,1),activation='linear',padding='same'))
+		model.add(LeakyReLU(alpha=.1))
+		model.add(Conv2D(512,(3,3),activation='linear',padding='same'))
+		model.add(LeakyReLU(alpha=.1))
+		model.add(Conv2D(256,(1,1),activation='linear',padding='same'))
+		model.add(LeakyReLU(alpha=.1))
+		model.add(Conv2D(512,(3,3),activation='linear',padding='same'))
+		model.add(LeakyReLU(alpha=.1))
+		model.add(Conv2D(256,(1,1),activation='linear',padding='same'))
+		model.add(LeakyReLU(alpha=.1))
+		model.add(Conv2D(512,(3,3),activation='linear',padding='same'))
+		model.add(LeakyReLU(alpha=.1))
+		model.add(Conv2D(512,(1,1),activation='linear',padding='same'))
+		model.add(LeakyReLU(alpha=.1))
+		model.add(Conv2D(1024,(3,3),activation='linear',padding='same'))
+		model.add(LeakyReLU(alpha=.1))
 		model.add(MaxPooling2D(pool_size=(2,2),strides=2))
 
-		model.add(Conv2D(512,(1,1),activation='LeakyRelU'))
-		model.add(Conv2D(1024,(3,3),activation='LeakyRelU'))
-		model.add(Conv2D(512,(1,1),activation='LeakyRelU'))
-		model.add(Conv2D(1024,(3,3),activation='LeakyRelU'))
-		model.add(Conv2D(1024,(3,3),activation='LeakyRelU'))
-		model.add(Conv2D(1024,(3,3),strides=2))
-
-		model.add(Conv2D(1024,(3,3),activation='LeakyRelU'))
-		model.add(Conv2D(1024,(3,3),activation='LeakyRelU'))
+		model.add(Conv2D(512,(1,1),activation='linear',padding='same'))
+		model.add(LeakyReLU(alpha=.1))
+		model.add(Conv2D(1024,(3,3),activation='linear',padding='same'))
+		model.add(LeakyReLU(alpha=.1))
+		model.add(Conv2D(512,(1,1),activation='linear',padding='same'))
+		model.add(LeakyReLU(alpha=.1))
+		model.add(Conv2D(1024,(3,3),activation='linear',padding='same'))
+		model.add(LeakyReLU(alpha=.1))
+		model.add(Conv2D(1024,(3,3),activation='linear',padding='same'))
+		model.add(LeakyReLU(alpha=.1))
+		model.add(Conv2D(1024,(3,3),strides=2,activation='linear',padding='same'))
+		model.add(LeakyReLU(alpha=.1))
+		model.add(Conv2D(1024,(3,3),activation='linear',padding='same'))
+		model.add(LeakyReLU(alpha=.1))
+		model.add(Conv2D(1024,(3,3),activation='linear',padding='same'))
+		model.add(LeakyReLU(alpha=.1))
 
 		model.add(Flatten())
+		model.add(Dense(512)) #fully connected layer
 		model.add(Dense(4096)) #fully connected layer
 		model.add(Dense(1470)) #fully connected layer
+		#!!!!!!!one possible to change to make it work:
+		# yuan dai ma li de linear=true
 
 		#model.compile(loss='binary_crossentropy', optimizer='Adam', metrics=['accuracy'])
 		#model.summary()
@@ -88,7 +115,6 @@ class yolo_tf:
 
 		saver = tf.train.Saver()
 		saver.restore(sess, self.weights_file)
-
 
 		#use keras layers to speed up the model definition process
 		#preds=model(x) #put placeholder in to defined model
@@ -193,8 +219,6 @@ def iou(box1,box2):
     if tb < 0 or lr < 0 : intersection = 0
     else : intersection =  tb*lr
     return intersection / (box1[2]*box1[3] + box2[2]*box2[3] - intersection)
-
-
 
 yolo = yolo_tf()
 
