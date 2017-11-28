@@ -4,11 +4,14 @@ from keras.applications.resnet50 import decode_predictions
 import numpy as np
 import cv2
 import os
-
+import character_detection
 
 
 trained_model = load_model('CNNModel.h5')
 
+
+
+#Getting input images from a folder
 path = os.getcwd()
 input_folder = 'input_dir'
 input_path = path + '/' + input_folder
@@ -31,18 +34,16 @@ input_data /= 255
 #print(input_data.shape)
 
 input_data = np.expand_dims(input_data, axis=4)
-#input_data = np.expand_dims(input_data, axis=3)
-#input_data = np.expand_dims(input_data, axis=0)
-
-#print(input_data.shape)
+print(input_data.shape)
 
 predictions = trained_model.predict(input_data)
-#print(predictions)
 #print('Predicted:', decode_predictions(predictions, top=3[0]))
-
 # round predictions
 #rounded = [round(x[0]) for x in predictions]
 #print(rounded)
+
+
+
 y_pred = trained_model.predict_classes(input_data, 1, verbose=0)
 print(y_pred)
 #print(y_pred.shape)
