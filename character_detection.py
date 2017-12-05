@@ -1,7 +1,7 @@
 #-------------------------------------------------------------------------#
 #
 # Character detection and segmentation using CCA
-#
+# This is a work in progress
 #-------------------------------------------------------------------------#
 
 from skimage.transform import resize
@@ -12,7 +12,11 @@ import matplotlib.pyplot as pyplt
 import numpy as np
 import plate_detection
 
-licensePlate = np.invert(plate_detection.possiblePlates[0])
+
+#Depending on input image, the possiblePlates index may need to be manually changed
+#For most images, index 0 will work best. For the demo (test_car5.jpg), index 2 is required
+
+licensePlate = np.invert(plate_detection.possiblePlates[2])
 #licensePlate = plate_detection.possiblePlates[0]
 #licensePlate = np.array(licensePlate)
 labelledPlate = measure.label(licensePlate)
@@ -29,19 +33,20 @@ licenseChars = []
 count = 0
 colArray = []
 
+#Iterate through labelled regions, and append the ones containing characters to an array
 for regions in regionprops(labelledPlate):
     charY0, charX0, charY1, charX1 = regions.bbox
     charHeight = charY1 - charY0
     charWidth = charX1 - charX0
 
     if charHeight > minCharHeight and charHeight < maxCharHeight and charWidth > minCharWidth and charWidth < maxCharWidth:
-        roi = licensePlate[charY0:charY1, charX0:charX1]
+        charRegion = licensePlate[charY0:charY1, charX0:charX1]
 
         regionBorder = patches.Rectangle((charX0-3, charY0-3), (charX1 - charX0) + 3, (charY1-charY0)+ 3, edgecolor = "red", linewidth = 2, fill = False)
 
         ax1.add_patch(regionBorder)
 
-        resizedChar = resize(roi, (32,32))
+        resizedChar = resize(charRegion, (32,32))
         licenseChars.append(resizedChar)
 
         colArray.append(charX0)

@@ -1,6 +1,7 @@
 #--------------------------------------------------------------------------------#
-#Using Connected Component Analysis (CCA) to detect connected regions
-#
+# 
+# Using Connected Component Analysis (CCA) to detect connected regions
+# 
 #
 #---------------------------------------------------------------------------------#
 
@@ -13,8 +14,8 @@ import matplotlib.patches as patches
 #import binary_image
 
 #Input image to Black and white using Otsu threshold
-carPic = imread("test_car2.jpg", as_grey=True)
-
+carPic = imread("test_car5.jpg", as_grey=True)
+#test_car5 works, region 2
 otsuLevel = threshold_otsu(carPic)
 carPicBW = carPic > otsuLevel
 
@@ -67,9 +68,9 @@ for region in regionprops(labeledPic):
 
 
         regionBox = patches.Rectangle((minX, minY), maxX-minX, maxY-minY, edgecolor = "red", linewidth = 2, fill = False)
-       # ax1.add_patch(regionBox)
+        ax1.add_patch(regionBox)
 
 #print(len(possiblePlates))
-#pyplt.show()
+pyplt.show()
 
 
